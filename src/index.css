@@ -1,0 +1,67 @@
+@tailwind  base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.message-bubble {
+  @apply rounded-2xl p-3 max-w-[80%];
+}
+
+.message-bubble.sent {
+  @apply bg-primary-600 text-white rounded-tr-none ml-auto;
+}
+
+.message-bubble.received {
+  @apply bg-gray-200 rounded-tl-none;
+}
+
+.auth-input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
+}
+
+.auth-btn {
+  @apply w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors;
+}
+
+/* Typing indicator animation */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.typing-indicator .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #888;
+  margin: 0 2px;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+ 
