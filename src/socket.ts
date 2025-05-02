@@ -8,6 +8,8 @@ interface ServerToClientEvents {
   receiveMessage: (message: any) => void;
   userTyping: (data: { userId: string; isTyping: boolean }) => void;
   userStatus: (data: { userId: string; online: boolean }) => void;
+  chatUpdated: (chat: any) => void;
+  messagesRead: (info: { chatId: string; userId: string }) => void;
 }
 
 interface ClientToServerEvents {
@@ -16,10 +18,12 @@ interface ClientToServerEvents {
   joinChat: (chatId: string) => void;
   leaveChat: (chatId: string) => void;
   checkUserStatus: (userId: string) => void;
+  chatUpdated: (chat: any) => void;
+  messagesRead: (info: { chatId: string; userId: string }) => void;
 }
 
 // Initialize actual Socket.IO client
-const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io('http://localhost:5000', {
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io('https://chating-room-sever.onrender.com', {
   autoConnect: false,
 });
 
@@ -59,7 +63,6 @@ export const getConnectionStatus = () => ({
 });
 
 export const setupSocketUser = (userId: string) => {
-  // Optionally send auth data
   socket.auth = { userId };
   connectSocket();
 };
@@ -72,9 +75,8 @@ export const sendSocketMessage = (chatId: string, message: any) => {
 export const listenForMessages = (chatId: string, callback: (message: any) => void) => {
   const eventName = 'receiveMessage';
   socket.off(eventName);
-  socket.on(eventName, (data: any) => {
-    // Expect server to include chatId if needed or filter on client
-    callback(data);
+  socket.on(eventName, (data) => {
+    if (data.chatId === chatId) callback(data);
   });
   socket.emit('joinChat', chatId);
   return () => {
@@ -94,10 +96,12 @@ export const listenForTyping = (chatId: string, callback: (data: { userId: strin
   const eventName = 'userTyping';
   socket.off(eventName);
   socket.on(eventName, (data) => {
-    callback(data);
+    if (data.chatId === chatId) callback(data);
   });
+  socket.emit('joinChat', chatId);
   return () => {
     socket.off(eventName);
+    socket.emit('leaveChat', chatId);
   };
 };
 
@@ -109,9 +113,35 @@ export const checkUserStatus = (userId: string) => {
 export const listenForUserStatus = (callback: (data: { userId: string; online: boolean }) => void) => {
   const eventName = 'userStatus';
   socket.off(eventName);
-  socket.on(eventName, (data) => {
-    callback(data);
-  });
+  socket.on(eventName, callback);
+  return () => {
+    socket.off(eventName);
+  };
+};
+
+// Chat update APIs
+export const emitChatUpdated = (chat: any) => {
+  socket.emit('chatUpdated', chat);
+};
+
+export const listenForChatUpdates = (callback: (chat: any) => void) => {
+  const eventName = 'chatUpdated';
+  socket.off(eventName);
+  socket.on(eventName, callback);
+  return () => {
+    socket.off(eventName);
+  };
+};
+
+// Messages read APIs
+export const emitMessagesRead = (chatId: string, userId: string) => {
+  socket.emit('messagesRead', { chatId, userId });
+};
+
+export const listenForMessagesRead = (callback: (info: { chatId: string; userId: string }) => void) => {
+  const eventName = 'messagesRead';
+  socket.off(eventName);
+  socket.on(eventName, callback);
   return () => {
     socket.off(eventName);
   };

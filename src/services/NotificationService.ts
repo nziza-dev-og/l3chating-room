@@ -3,7 +3,7 @@ import { collection, addDoc, serverTimestamp, updateDoc, doc, orderBy, where, li
 import socket from '../socket'; // import your socket instance
 
 // Replace proxy URL with your server's base URL
-const SERVER_URL = 'http://localhost:5000';
+const SERVER_URL = 'https://chating-room-sever.onrender.com';
 
 export interface Notification {
   id: string;
